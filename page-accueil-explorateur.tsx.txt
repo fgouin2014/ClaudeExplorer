@@ -1,0 +1,42 @@
+import React, { useState } from 'react';
+import { Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+const HomePage = ({ onFileOpen }) => {
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (file) {
+      onFileOpen(file);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <h1 className="text-4xl font-bold mb-8 text-gray-800 dark:text-white">
+        Explorateur de Sauvegardes
+      </h1>
+      <form onSubmit={handleSubmit} className="w-full max-w-md">
+        <div className="flex items-center space-x-2">
+          <Input
+            type="file"
+            onChange={handleFileChange}
+            accept=".zip"
+            className="flex-grow"
+          />
+          <Button type="submit" disabled={!file}>
+            <Upload className="mr-2 h-4 w-4" /> Ouvrir
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default HomePage;

@@ -1,0 +1,81 @@
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Code, FileText, Image } from 'lucide-react';
+
+const ArtifactPreview = ({ artifact }) => {
+  const getArtifactType = (content) => {
+    if (content.startsWith('<svg') || content.includes('image/svg+xml')) {
+      return 'svg';
+    } else if (content.trim().startsWith('<')) {
+      return 'html';
+    } else if (content.includes('```') || content.includes('function') || content.includes('class')) {
+      return 'code';
+    } else {
+      return 'text';
+    }
+  };
+
+  const renderContent = () => {
+    const type = getArtifactType(artifact.content);
+
+    switch (type) {
+      case 'svg':
+        return <div dangerouslySetInnerHTML={{ __html: artifact.content }} />;
+      case 'html':
+        return (
+          <Tabs defaultValue="preview">
+            <TabsList>
+              <TabsTrigger value="preview">Aperçu</TabsTrigger>
+              <TabsTrigger value="source">Source</TabsTrigger>
+            </TabsList>
+            <TabsContent value="preview">
+              <div dangerouslySetInnerHTML={{ __html: artifact.content }} />
+            </TabsContent>
+            <TabsContent value="source">
+              <pre className="bg-gray-100 p-4 rounded overflow-auto">
+                <code>{artifact.content}</code>
+              </pre>
+            </TabsContent>
+          </Tabs>
+        );
+      case 'code':
+        return (
+          <pre className="bg-gray-100 p-4 rounded overflow-auto">
+            <code>{artifact.content}</code>
+          </pre>
+        );
+      default:
+        return <p className="whitespace-pre-wrap">{artifact.content}</p>;
+    }
+  };
+
+  const getIcon = () => {
+    const type = getArtifactType(artifact.content);
+    switch (type) {
+      case 'svg':
+      case 'html':
+        return <Image className="w-5 h-5" />;
+      case 'code':
+        return <Code className="w-5 h-5" />;
+      default:
+        return <FileText className="w-5 h-5" />;
+    }
+  };
+
+  return (
+    <Card className="w-full h-full overflow-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          {getIcon()}
+          <span>{artifact.path || 'Aperçu de l'artefact'}</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {renderContent()}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ArtifactPreview;

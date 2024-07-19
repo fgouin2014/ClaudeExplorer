@@ -1,0 +1,74 @@
+import React, { useState } from 'react';
+import { Folder, File, ChevronRight, ChevronDown } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
+const ArtifactExplorer = ({ artifacts, onSelectArtifact }) => {
+  const [expandedNodes, setExpandedNodes] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const toggleNode = (nodePath) => {
+    setExpandedNodes(prev => ({
+      ...prev,
+      [nodePath]: !prev[nodePath]
+    }));
+  };
+
+  const renderTree = (node, path = '') => {
+    if (typeof node === 'string') {
+      return (
+        <div 
+          key={path} 
+          className="flex items-center py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+          onClick={() => onSelectArtifact({ path, content: node })}
+        >
+          <File className="mr-2 h-4 w-4" />
+          {path.split('/').pop()}
+        </div>
+      );
+    }
+
+    const isExpanded = expandedNodes[path];
+    return (
+      <div key={path}>
+        <div 
+          className="flex items-center py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+          onClick={() => toggleNode(path)}
+        >
+          {isExpanded ? <ChevronDown className="mr-2 h-4 w-4" /> : <ChevronRight className="mr-2 h-4 w-4" />}
+          <Folder className="mr-2 h-4 w-4" />
+          {path.split('/').pop() || 'Root'}
+        </div>
+        {isExpanded && (
+          <div className="ml-4">
+            {Object.entries(node).map(([key, value]) => 
+              renderTree(value, path ? `${path}/${key}` : key)
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const filteredArtifacts = searchTerm
+    ? Object.fromEntries(
+        Object.entries(artifacts).filter(([key]) => 
+          key.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      )
+    : artifacts;
+
+  return (
+    <div className="h-full p-4 border-r overflow-auto">
+      <Input 
+        type="text" 
+        placeholder="Rechercher des artefacts..." 
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="mb-4"
+      />
+      {renderTree(filteredArtifacts)}
+    </div>
+  );
+};
+
+export default ArtifactExplorer;
